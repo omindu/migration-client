@@ -54,7 +54,7 @@ import static org.wso2.is.data.sync.system.util.Constant.COLUMN_NAME_SYNC_ID;
  */
 public class BatchProcessor {
 
-    private Log log = LogFactory.getLog(BatchProcessor.class);
+    private static final Log log = LogFactory.getLog(BatchProcessor.class);
 
     public List<JournalEntry> pollJournal(PipelineContext context) throws SyncClientException {
 
@@ -102,7 +102,7 @@ public class BatchProcessor {
         sql = String.format(sql, tableMetaData.getColumns(), syncTableName);
         try (PreparedStatement ps = sourceCon.prepareStatement(sql)) {
             ps.setInt(1, targetSyncId);
-            ps.setInt(2, targetSyncId + batchSize);
+            ps.setInt(2, targetSyncId + batchSize +1);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {

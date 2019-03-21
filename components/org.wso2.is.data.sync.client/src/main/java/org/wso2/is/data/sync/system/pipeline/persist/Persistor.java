@@ -31,6 +31,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +54,7 @@ import static org.wso2.is.data.sync.system.util.Constant.ENTRY_FILED_ACTION_UPDA
  */
 public class Persistor {
 
-    private Log log = LogFactory.getLog(Persistor.class);
+    private static final Log log = LogFactory.getLog(Persistor.class);
 
     public List<TransactionResult> persist(List<JournalEntry> transformedEntryList, PipelineContext context)
             throws SyncClientException {
@@ -121,15 +122,18 @@ public class Persistor {
                                 TransactionResult result = new TransactionResult(entry, true);
                                 transactionResults.add(result);
                             } catch (SQLException e) {
-                                log.error("Error occurred while data sync.", e);
-                                log.error(e.getSQLState());
-                                try {
-                                    Thread.sleep(5000);
-                                } catch (InterruptedException e1) {
-                                    //
+                                if (e instanceof SQLIntegrityConstraintViolationException) {
+                                    //ignore. this will be recovered.
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("SQL constraint violation occurred while data sync. ", e);
+                                    }
+                                } else {
+                                    log.error("Error occurred while data sync. ", e);
                                 }
                                 TransactionResult result = new TransactionResult(entry, false, e);
                                 transactionResults.add(result);
+                                // If there is one failure, there is no need to continue processing the other results.
+                                break;
                             }
                         }
                     }

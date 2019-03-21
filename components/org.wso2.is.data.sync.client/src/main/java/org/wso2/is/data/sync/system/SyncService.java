@@ -34,6 +34,10 @@ import org.wso2.is.data.sync.system.pipeline.transform.v570.OAuthTokenDataTransf
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
 
 public class SyncService {
@@ -42,8 +46,8 @@ public class SyncService {
     private DataSourceManager dataSourceManager;
     private List<DataTransformer> dataTransformers = new ArrayList<>();
     private DDLGenerator ddlGenerator;
-    private List<SyncDataTask> syncDataTaskList = new ArrayList<>();
     private List<String> syncTables;
+    private List<SyncDataTask> syncDataTaskList = new ArrayList<>();
 
     private Log log = LogFactory.getLog(SyncService.class);
 
